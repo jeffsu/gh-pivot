@@ -1,0 +1,42 @@
+%h1 Pivot by Labels
+%form{ :action => '/pivot' }
+  %label Labels
+  %input{ :name => 'labels', :value => params[:labels] }
+  %label Label Filters
+  %input{ :name => 'filters', :value => params[:filters] }
+  %br/
+  %input.btn{ :type => 'submit' }
+
+- (@labels + [ 'others' ]).each do |l|
+  %h5= l
+  %ul.sortable{ :label => l }
+    - @by_labels[l].each do |i|
+      %li{ :number => i.number, :label => l }
+        %a{ :href => i.html_url }
+          %strong= "##{i.number} " 
+          %span= i.title + " (#{i.labels.collect { |l| l['name'] }.join(', ')})"
+
+:javascript
+  $(function () { 
+    $('.sortable').sortable({ 
+      axis: 'y', 
+      connectWith: '.sortable',
+      stop: change   
+    }) 
+  })
+
+  function change(evt, ui) {
+    var $ele = $(evt.srcElement);
+    var $ul  = $ele.closest('ul');
+    var ulL  = $ul.attr('label');
+
+    var l = $ele.attr('label');
+    var n = $ele.attr('number');
+    if (ulL != l) {
+      $.post('/update-issue', { label: ulL, number: n, remove: l }, function () { $ele.attr('label', ulL); console.log('saved') });
+    }
+  }
+%style
+  :sass
+    .sortable
+      padding: 3px

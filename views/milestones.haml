@@ -1,0 +1,28 @@
+- @milestones.each do |m|
+  %h5= m.title
+  %ul.sortable{ :number => m.number }
+    - if issues = @by_milestones[m.number]
+      - issues.each do |i|
+        %li{ :number => i.number }= i.title
+        
+:javascript
+  $(function () { 
+    $('.sortable').sortable({ 
+      axis: 'y', 
+      connectWith: '.sortable',
+      stop: change   
+    }) 
+  })
+
+  function change(evt, ui) {
+    var $ele = $(evt.srcElement);
+    var $ul  = $ele.closest('ul');
+    var mnumber = $ul.attr('number');
+    var n = $ele.attr('number');
+    $.post('/update-issue', { milestone: mnumber, number: n }, function () { console.log('saved') });
+  }
+
+%style
+  :sass
+    .sortable
+      padding: 3px

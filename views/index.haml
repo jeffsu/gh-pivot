@@ -1,0 +1,16 @@
+%h1 Set Credentials 
+%form{ :action => '/login', :method => 'post' }
+  %label Username
+  %input{ :name => :username }
+  %label Password
+  %input{ :name => :password, :type => :password }
+  %input{ :type => 'submit' }
+  
+%a{ :href => '/milestones' } Milestones
+
+%h1 Pivot
+%form{ :action => '/pivot' }
+  %label Labels
+  %input{ :name => 'labels' }
+
+  %input{ :type => 'submit' }
