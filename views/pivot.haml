@@ -17,12 +17,14 @@
           - @by_labels[l].each do |i|
             %tr{ :number => i.number, :label => l }
               %td
-                %a{ :href => i.html_url }
+                %a.tip{ :href => i.html_url, :title => i.body }
                   %strong= "##{i.number}" 
               %td= i.title 
               %td= i.assignee.login
               %td= i.milestone.title
-              %td= i.labels.map { |l| l.name }.join(', ')
+              %td
+                - i.labels.each do |l|
+                  %span.label= l.name
               %td= i.state
           - if @by_labels[l].empty?
             %tr
@@ -56,7 +58,8 @@
       axis: 'y', 
       connectWith: '.sortable',
       stop: change   
-    }) 
+    });
+    $('.tip').tooltip({ placement: 'bottom' });
   })
 
   function change(evt, ui) {

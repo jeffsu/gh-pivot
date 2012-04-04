@@ -7,23 +7,32 @@
           %th Title
           %th Labels
           %th Assignee
+          %th Status
       - @milestones.each do |m|
         %thead
           %tr
-            %th{ :colspan => 4 }= m.title
+            %th
+            %th{ :colspan => 4 }
+              %a.large{ :href => "https://github.com/#{@gh.user}/#{@gh.repo}/milestones/#{m.number}" }= m.title
+              (
+              %a.small{ :href => "/pivot?milestone=#{m.number}"} pivot
+              )
         %tbody.sortable{ :milestone => m.number }
           - if issues = @by_milestones[m.number]
             - issues.each do |i|
               %tr{ :number => i.number, :milestone => m.number }
                 %td
-                  %a{ :href => i.html_url }
+                  %a.tip{ :href => i.html_url, :title => i.body }
                     %strong= "##{i.number}" 
                 %td= i.title 
-                %td= i.labels.collect { |l| l.name }.join(', ');
+                %td
+                  - i.labels.each do |l|
+                    %span.label= l.name
                 %td= i.assignee.login
+                %td= i.state
           - else
             %tr
-              %td{ :colspan => 4 }
+              %td{ :colspan => 5 }
   .span3
     %h1 Pivot by Milestones
     %form{ :action => '/milestones' }
@@ -42,7 +51,7 @@
       %input.btn.btn-info{ :type => 'submit', :value => 'Filter' }
     %hr
     %a.btn.btn-info{ :href => "/milestones" } Pivot By Labels
-    %a.btn.btn-success{ :href => "http://github.com/#{@gh.user}/#{@gh.repo}/issues/new" } New Issue
+    %a.btn.btn-success{ :href => "https://github.com/#{@gh.user}/#{@gh.repo}/issues/new" } New Issue
 
 
 :javascript
@@ -52,6 +61,7 @@
       connectWith: '.sortable',
       stop: change   
     }) 
+    $('.tip').tooltip({ placement: 'right' });
   })
 
   function change(evt, ui) {
