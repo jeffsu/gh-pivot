@@ -35,6 +35,16 @@ class GH
     return OpenStruct.new(hash)
   end
 
+  def normalize_comment(hash)
+    ret = OpenStruct.new(hash)
+    ret.user = normalize_user(hash['user'])
+    return ret
+  end
+
+  def comments(n)
+    return request("issues/#{n}/comments").collect { |c| normalize_comment(c) }
+  end
+
   def issues(incomming={})
     params = {}
     ISSUE_FILTERS.each { |k| params[k] = incomming[k] if incomming[k] && incomming[k] != '' }

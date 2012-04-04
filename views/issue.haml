@@ -1,7 +1,21 @@
-%h3= @issue.title
-Assigned To:
-%small= @issue.assignee ? @issue.assignee.login : 'Not Assigned'
-
+%table.table.table-condensed.table-bordered
+  %th{ :colspan => 2 }= @issue.title
+  %tr
+    %th Assigned To:
+    %td= @issue.assignee ? @issue.assignee.login : 'Not Assigned'
+  %tr
+    %th Status:
+    %td= @issue.state
 %p
   :markdown
     #{@issue.body}
+- if @issue.comments.any?
+  %hr
+  %h5 Comments
+  %ol.comments.unstyled
+    - @issue.comments.each do |c|
+      %li
+        Posted by #{c.user.login}:
+        .well
+          :markdown
+            #{c.body}

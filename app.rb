@@ -105,7 +105,7 @@ class App < Sinatra::Application
 
   get '/:user/:repo/issues/:n' do
     @issue = @gh.issue(params[:n])
-    puts @issue
+    @issue.comments =  @issue.comments > 0 ? @gh.comments(@issue.number) : []
     haml :issue
   end
 end
