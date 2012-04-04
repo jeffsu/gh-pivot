@@ -10,8 +10,6 @@ require "#{ROOT}/lib/gh"
 class App < Sinatra::Application
   enable :sessions
 
-  CONFIG = YAML.load_file("#{ROOT}/config.yml")
-
   before do
     @gh = nil
 
@@ -103,5 +101,11 @@ class App < Sinatra::Application
     elsif params[:milestone]
       @gh.post("issues/#{issue.number}", :milestone => params[:milestone] == '0' ? nil : params[:milestone])
     end
+  end
+
+  get '/:user/:repo/issues/:n' do
+    @issue = @gh.issue(params[:n])
+    puts @issue
+    haml :issue
   end
 end

@@ -21,7 +21,7 @@
               %td
                 %a.tip{ :href => i.html_url, :title => i.body }
                   %strong= "##{i.number}" 
-              %td= i.title 
+              %td{ :onclick => "popIssue(#{i.number})" }= i.title 
               %td= i.assignee.login
               %td
                 = i.milestone.title
@@ -58,7 +58,9 @@
     %hr
     %a.btn.btn-info{ :href => "#{prefix}/milestones" } Pivot By Milestones
     %a.btn.btn-success{ :href => "http://github.com#{prefix}/issues/new" } New Issue
-
+    
+    %hr
+    .issue
 
 :javascript
   $(function () { 

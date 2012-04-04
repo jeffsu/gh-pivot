@@ -29,7 +29,7 @@
                 %td
                   %a.tip{ :href => i.html_url, :title => i.body }
                     %strong= "##{i.number}" 
-                %td= i.title 
+                %td{ :onclick => "popIssue(#{i.number})" }= i.title 
                 %td
                   - i.labels.each do |l|
                     %span.label{ :style => "background-color: ##{l.color}"}= l.name
@@ -59,6 +59,8 @@
     %hr
     %a.btn.btn-info{ :href => "#{prefix}/milestones" } Pivot By Labels
     %a.btn.btn-success{ :href => "https://github.com#{prefix}/issues/new" } New Issue
+    %hr
+    .issue
 
 
 :javascript

@@ -31,8 +31,14 @@
     :javascript
       $(function () { 
         $('.tip').tooltip({ placement: 'right' }); 
-        $('.saving').ajaxStart(function () { $('.saving').html('Saving...').fadeIn() });
+        $('.saving').ajaxStart(function () { $('.saving').html('Sending...').fadeIn() });
         $('.saving').ajaxSuccess(function () { $('.saving').html('Success!').delay(2000).fadeOut() });
         $('.saving').ajaxError(function () { $('.saving').html('Error!').delay(2000).fadeOut() });
-      });
+      });  
+      function popIssue(n) {
+        var $issue = $('.issue');
+        $.get('#{prefix}/issues/' + n, function (data) { console.log(data); $('.issue').html(data) });
+      }
+
+
 

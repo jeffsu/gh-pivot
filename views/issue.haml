@@ -1,0 +1,7 @@
+%h3= @issue.title
+Assigned To:
+%small= @issue.assignee ? @issue.assignee.login : 'Not Assigned'
+
+%p
+  :markdown
+    #{@issue.body}
