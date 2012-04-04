@@ -1,0 +1,5 @@
+tr.divider > th {
+  background-color: #DDD;
+  color: black;
+  border-top: 1px solid #BBB;
+}

@@ -1,1 +1,11 @@
-
+%form.form{ :action => '/login', :method => 'post' }
+  %label Github Username
+  %input{ :name => 'username' }
+  %label Github Password
+  %input{ :name => 'password', :type => 'password' }
+  %label Github Repo Owner (defaults to user above)
+  %input{ :name => 'user' }
+  %label Github Repo
+  %input{ :name => 'repo' }
+  %br
+  %input.btn{ :type => 'submit', :value => 'login' }

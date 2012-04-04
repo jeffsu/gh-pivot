@@ -1,3 +1,4 @@
+
 .row-fluid
   .span9
     %table.table-bordered.table.table-condensed
@@ -10,13 +11,17 @@
           %th Status
       - @milestones.each do |m|
         %thead
-          %tr
+          %tr.divider
             %th
-            %th{ :colspan => 4 }
-              %a.large{ :href => "https://github.com/#{@gh.user}/#{@gh.repo}/milestones/#{m.number}" }= m.title
-              (
-              %a.small{ :href => "/pivot?milestone=#{m.number}"} pivot
-              )
+            %th{ :colspan => 2 }
+              = m.title
+              = m.due_on ? " - " + m.due_on.sub(/T.*/, '') : ''
+              - if m.number > 0
+                %a.tip.large{ :href => %"https://github.com/#{@gh.user}/#{@gh.repo}/issues?milestone=#{m.number}", :title => m.description }= '#' + m.number.to_s
+            %th{ :colspan => 2 }
+              %a.small.btn.btn-mini.btn-info{ :href => "#{prefix}/pivot?milestone=#{m.number}"} pivot
+              %a.small.btn.btn-mini.btn-alert{ :onclick => '$(this).closest("thead").next().fadeToggle()'} toggle
+
         %tbody.sortable{ :milestone => m.number }
           - if issues = @by_milestones[m.number]
             - issues.each do |i|
@@ -27,16 +32,18 @@
                 %td= i.title 
                 %td
                   - i.labels.each do |l|
-                    %span.label= l.name
+                    %span.label{ :style => "background-color: ##{l.color}"}= l.name
                 %td= i.assignee.login
                 %td= i.state
           - else
             %tr
               %td{ :colspan => 5 }
   .span3
-    %h1 Pivot by Milestones
-    %form{ :action => '/milestones' }
-      %label Labels
+    %h3 Pivot by Milestones
+    %span.help-inline Drag and drop issues to change their milestones.
+    %hr
+    %form{ :action => "#{prefix}/milestones" }
+      %label Labels: comma separated list of labels to filter by
       %input{ :name => 'labels', :value => params[:labels] }
       %label Assignee
       %input{ :name => 'assignee', :value => params[:assignee] }
@@ -45,13 +52,13 @@
       %label Status
       %select{ :name => 'state' }
         %option{ :value => 'open' } Open
-        %option{ :value => 'closed' } Closed
+        %option{ :value => 'closed', :selected => (params[:state] == 'closed' ? true : nil) } Closed
 
       %br/
       %input.btn.btn-info{ :type => 'submit', :value => 'Filter' }
     %hr
-    %a.btn.btn-info{ :href => "/milestones" } Pivot By Labels
-    %a.btn.btn-success{ :href => "https://github.com/#{@gh.user}/#{@gh.repo}/issues/new" } New Issue
+    %a.btn.btn-info{ :href => "#{prefix}/milestones" } Pivot By Labels
+    %a.btn.btn-success{ :href => "https://github.com#{prefix}/issues/new" } New Issue
 
 
 :javascript
@@ -61,7 +68,6 @@
       connectWith: '.sortable',
       stop: change   
     }) 
-    $('.tip').tooltip({ placement: 'right' });
   })
 
   function change(evt, ui) {
@@ -72,7 +78,7 @@
     var issueMN = $ele.attr('milestone');
     var n = $ele.attr('number');
     if (issueMN != mn) {
-      $.post('/update-issue', { milestone: mn, number: n }, function () { $ele.attr('milestone', mn); console.log('saved') });
+      $.post('#{prefix}/update-issue', { milestone: mn, number: n }, function () { $ele.attr('milestone', mn); console.log('saved') });
     }
   }
 %style

@@ -2,11 +2,36 @@
 %html
   %head
     %link{ :rel => 'stylesheet', :href => '/bootstrap/css/bootstrap.min.css' }
+    %link{ :rel => 'stylesheet', :href => '/base.css' }
     %script{ :type => 'text/javascript', :src => '/jquery.js' }
     %script{ :type => 'text/javascript', :src => '/bootstrap/js/bootstrap.js' }
     %script{ :type => 'text/javascript', :src => '/jquery-ui.js' }
     
-  %body
+  %body{ :style => 'padding-top: 60px' }
+    .navbar.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          %a.brand{ :href => '/' }
+            Github Pivot:
+            - if @gh && @gh.user && @gh.repo
+              %small= @gh.user + '/' + @gh.repo
+          .nav-collapse
+            %ul.nav
+              %li 
+                %a Pivot By:
+              %li
+                %a{ :href => "#{prefix}/milestones" } Milestones
+              %li
+                %a{ :href => "#{prefix}/pivot" } Labels
+            
     .container-fluid
-      %h1 Github Pivot
       =yield
+    .saving{ :style => 'position: fixed; bottom: 0; left: 0; background-color: #eee; padding: 15px; font-size: 2em; display: none' }
+    :javascript
+      $(function () { 
+        $('.tip').tooltip({ placement: 'right' }); 
+        $('.saving').ajaxStart(function () { $('.saving').html('Saving...').fadeIn() });
+        $('.saving').ajaxSuccess(function () { $('.saving').html('Success!').delay(2000).fadeOut() });
+        $('.saving').ajaxError(function () { $('.saving').html('Error!').delay(2000).fadeOut() });
+      });
+

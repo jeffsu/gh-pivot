@@ -11,8 +11,10 @@
           %th Satus
       - (@labels + [ 'others' ]).each do |l|
         %thead
-          %tr
-            %th{ :colspan => 6 }= l
+          %tr.divider
+            %th{ :colspan => 5 }= l
+            %th
+              %a.btn.btn-mini{ :onclick => "$(this).closest('thead').next().fadeToggle()" } toggle
         %tbody.sortable{ :label => l }
           - @by_labels[l].each do |i|
             %tr{ :number => i.number, :label => l }
@@ -21,20 +23,26 @@
                   %strong= "##{i.number}" 
               %td= i.title 
               %td= i.assignee.login
-              %td= i.milestone.title
+              %td
+                = i.milestone.title
+                %a.btn.btn-mini.btn-info{ :href => "#{prefix}/milestones?milestone=#{i.milestone.number}" } pivot
               %td
                 - i.labels.each do |l|
-                  %span.label= l.name
+                  %span.label{ :style => "background-color: ##{l.color}" }= l.name
               %td= i.state
           - if @by_labels[l].empty?
             %tr
               %td{ :colspan => 6 }
   .span3
-    %h1 Pivot by Labels
-    %form{ :action => '/pivot' }
-      %label Group By
+    %h3 Pivot by Labels
+    %span.help-inline Drag and drop issues to change their labels.
+    %hr
+
+    %form{ :action => "#{prefix}/pivot" }
+      %label Group By: comma separated list of labels to group by
       %input{ :name => 'group_by', :value => params[:group_by] }
-      %label Labels
+      
+      %label Labels: comma separated list of labels to filter by
       %input{ :name => 'labels', :value => params[:labels] }
       %label Assignee
       %input{ :name => 'assignee', :value => params[:assignee] }
@@ -43,13 +51,13 @@
       %label Status
       %select{ :name => 'state' }
         %option{ :value => 'open' } Open
-        %option{ :value => 'closed' } Closed
+        %option{ :value => 'closed', :selected => (params[:state] == 'closed' ? true : nil) } Closed
 
       %br/
       %input.btn.btn-info{ :type => 'submit', :value => 'Filter' }
     %hr
-    %a.btn.btn-info{ :href => "/milestones" } Pivot By Milestones
-    %a.btn.btn-success{ :href => "http://github.com/#{@gh.user}/#{@gh.repo}/issues/new" } New Issue
+    %a.btn.btn-info{ :href => "#{prefix}/milestones" } Pivot By Milestones
+    %a.btn.btn-success{ :href => "http://github.com#{prefix}/issues/new" } New Issue
 
 
 :javascript
@@ -70,7 +78,7 @@
     var l = $ele.attr('label');
     var n = $ele.attr('number');
     if (ulL != l) {
-      $.post('/update-issue', { label: ulL, number: n, remove: l }, function () { $ele.attr('label', ulL); console.log('saved') });
+      $.post('#{prefix}/update-issue', { label: ulL, number: n, remove: l }, function () { $ele.attr('label', ulL); console.log('saved') });
     }
   }
 %style

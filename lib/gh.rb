@@ -7,13 +7,11 @@ class GH
   ISSUE_FILTERS = %W| labels assignee state milestone since per_page page |
  
   def initialize(credentials) 
-    @username = credentials['username'] 
-    @password = credentials['password'] 
+    @username = credentials[:username] 
+    @password = credentials[:password] 
 
-    @user = credentials['user'] 
-    @repo = credentials['repo'] 
-
-    @requests = nil
+    @user = credentials[:user] 
+    @repo = credentials[:repo] 
   end
 
   def normalize_issue(hash)
@@ -67,6 +65,7 @@ class GH
       curl.username = username
       curl.password = password
     end
+
     puts c.body_str
   end
  
