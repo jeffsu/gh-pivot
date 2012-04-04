@@ -4,6 +4,7 @@ require 'ostruct'
 
 class GH 
   attr_accessor :username, :password, :user, :repo
+  ISSUE_FILTERS = %W| labels assignee state milestone since per_page page |
  
   def initialize(credentials) 
     @username = credentials['username'] 
@@ -15,22 +16,58 @@ class GH
     @requests = nil
   end
 
-  def issues(params={})
+  def normalize_issue(hash)
+    warn hash.inspect
+    ret = OpenStruct.new(hash)
+    ret.labels    = (hash['labels'] || []).collect { |l| normalize_label(l) }
+    ret.milestone = normalize_milestone(hash['milestone'] || { :title => 'Others', :number => 0 })
+    ret.assignee  = normalize_user(hash['assignee'])
+    ret
+  end
+
+  def normalize_user(hash={ :name => '-na-' })
+    return OpenStruct.new(hash)
+  end
+
+  def normalize_label(hash)
+    return OpenStruct.new(hash)
+  end
+
+  def normalize_milestone(hash)
+    return OpenStruct.new(hash)
+  end
+
+  def issues(incomming={})
+    params = {}
+    ISSUE_FILTERS.each { |k| params[k] = incomming[k] if incomming[k] && incomming[k] != '' }
+    params['per_page'] ||= 100
+    params['page'] ||= 1
+    puts "calling page: #{params['page']}"
+
     query = params.keys.collect { |k| "#{k}=#{params[k]}" }.join('&')
-    return request("issues?#{query}").collect { |i| OpenStruct.new(i) }.sort { |a,b| a.number <=> b.number }
+
+    ret = request("issues?#{query}").collect { |i| normalize_issue(i) }.sort { |a,b| a.number <=> b.number }
+
+    if ret.any? && ret.length <= params['per_page']
+      params['page'] += 1
+      puts "Paging #{params['page']}, #{ret.length} | #{params['per_page']}"
+      ret += issues(params) 
+    end
+
+    return ret
   end
 
   def issue(n)
-    return OpenStruct.new(request("issues/#{n}"))
+    return normalize_issue(request("issues/#{n}"))
   end
 
   def post(path, params) 
-    puts params.to_json
     c = Curl::Easy.http_post(url(path), params.to_json) do |curl|
       curl.http_auth_types = :basic
       curl.username = username
       curl.password = password
     end
+    puts c.body_str
   end
  
 
@@ -39,6 +76,7 @@ class GH
   end
 
   def request(path)
+    puts path
     c = Curl::Easy.new(url(path))
 
     c.http_auth_types = :basic
@@ -53,42 +91,5 @@ class GH
     return "https://api.github.com/repos/#{user}/#{repo}/#{path}"
   end
 
-
-  def multi
-    m = Multi.new(self)
-    yield(m) 
-    return m.execute
-  end
-
-  class Multi
-    def initialize(gh) 
-      @gh   = gh
-      @ret  = Hash.new
-      @m = Curl::Multi.new 
-    end
-
-    def issues(key=:issues, params={})
-      query = params.keys.collect { |k| "#{k}=#{params[k]}" }.join('&')
-      request(key, "issues?#{query}")
-    end
-
-    def execute
-      @m.perform { }
-      return @ret
-    end
-
-    def request(key, path)
-      c = Curl::Easy.new("https://api.github.com/repos/#{@gh.user}/#{@gh.repo}/#{path}")
-      puts("https://api.github.com/repos/#{@gh.user}/#{@gh.repo}/#{path}")
-
-      c.http_auth_types = :basic
-      c.username = @gh.username
-      c.password = @gh.password
-
-      c.on_body { |data| @ret[key] = data; puts data }
-      @m.add(c)
-    end
-
-  end
 end
 

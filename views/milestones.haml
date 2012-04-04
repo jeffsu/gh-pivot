@@ -1,10 +1,50 @@
-- @milestones.each do |m|
-  %h5= m.title
-  %ul.sortable{ :number => m.number }
-    - if issues = @by_milestones[m.number]
-      - issues.each do |i|
-        %li{ :number => i.number }= i.title
-        
+.row-fluid
+  .span9
+    %table.table-bordered.table.table-condensed
+      %thead
+        %tr
+          %th Number
+          %th Title
+          %th Labels
+          %th Assignee
+      - @milestones.each do |m|
+        %thead
+          %tr
+            %th{ :colspan => 4 }= m.title
+        %tbody.sortable{ :milestone => m.number }
+          - if issues = @by_milestones[m.number]
+            - issues.each do |i|
+              %tr{ :number => i.number, :milestone => m.number }
+                %td
+                  %a{ :href => i.html_url }
+                    %strong= "##{i.number}" 
+                %td= i.title 
+                %td= i.labels.collect { |l| l.name }.join(', ');
+                %td= i.assignee.login
+          - else
+            %tr
+              %td{ :colspan => 4 }
+  .span3
+    %h1 Pivot by Milestones
+    %form{ :action => '/milestones' }
+      %label Labels
+      %input{ :name => 'labels', :value => params[:labels] }
+      %label Assignee
+      %input{ :name => 'assignee', :value => params[:assignee] }
+      %label Milestone Number
+      %input{ :name => 'milestone', :value => params[:milestone] }
+      %label Status
+      %select{ :name => 'state' }
+        %option{ :value => 'open' } Open
+        %option{ :value => 'closed' } Closed
+
+      %br/
+      %input.btn.btn-info{ :type => 'submit', :value => 'Filter' }
+    %hr
+    %a.btn.btn-info{ :href => "/milestones" } Pivot By Labels
+    %a.btn.btn-success{ :href => "http://github.com/#{@gh.user}/#{@gh.repo}/issues/new" } New Issue
+
+
 :javascript
   $(function () { 
     $('.sortable').sortable({ 
@@ -15,14 +55,17 @@
   })
 
   function change(evt, ui) {
-    var $ele = $(evt.srcElement);
-    var $ul  = $ele.closest('ul');
-    var mnumber = $ul.attr('number');
-    var n = $ele.attr('number');
-    $.post('/update-issue', { milestone: mnumber, number: n }, function () { console.log('saved') });
-  }
+    var $ele = $(ui.item);
+    var $ul  = $ele.closest('.sortable');
+    var mn  = $ul.attr('milestone');
 
+    var issueMN = $ele.attr('milestone');
+    var n = $ele.attr('number');
+    if (issueMN != mn) {
+      $.post('/update-issue', { milestone: mn, number: n }, function () { $ele.attr('milestone', mn); console.log('saved') });
+    }
+  }
 %style
   :sass
     .sortable
-      padding: 3px
+      min-height: 30px
