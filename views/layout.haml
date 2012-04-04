@@ -35,9 +35,10 @@
         $('.saving').ajaxSuccess(function () { $('.saving').html('Success!').delay(2000).fadeOut() });
         $('.saving').ajaxError(function () { $('.saving').html('Error!').delay(2000).fadeOut() });
       });  
+
       function popIssue(n) {
-        var $issue = $('.issue');
-        $.get('#{prefix}/issues/' + n, function (data) { console.log(data); $('.issue').html(data) });
+        var $issue = $('.issue').hide();
+        $.get('#{prefix}/issues/' + n, function (data) { console.log(data); $('.issue').hide().html(data).fadeIn(); });
       }
 
 

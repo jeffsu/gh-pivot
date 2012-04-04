@@ -42,6 +42,8 @@
     %h3 Pivot by Milestones
     %span.help-inline Drag and drop issues to change their milestones.
     %hr
+    .issue
+
     %form{ :action => "#{prefix}/milestones" }
       %label Labels: comma separated list of labels to filter by
       %input{ :name => 'labels', :value => params[:labels] }
@@ -59,8 +61,6 @@
     %hr
     %a.btn.btn-info{ :href => "#{prefix}/milestones" } Pivot By Labels
     %a.btn.btn-success{ :href => "https://github.com#{prefix}/issues/new" } New Issue
-    %hr
-    .issue
 
 
 :javascript

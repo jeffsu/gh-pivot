@@ -37,6 +37,7 @@
     %h3 Pivot by Labels
     %span.help-inline Drag and drop issues to change their labels.
     %hr
+    .issue
 
     %form{ :action => "#{prefix}/pivot" }
       %label Group By: comma separated list of labels to group by
@@ -59,8 +60,6 @@
     %a.btn.btn-info{ :href => "#{prefix}/milestones" } Pivot By Milestones
     %a.btn.btn-success{ :href => "http://github.com#{prefix}/issues/new" } New Issue
     
-    %hr
-    .issue
 
 :javascript
   $(function () { 
