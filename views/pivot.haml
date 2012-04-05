@@ -21,14 +21,14 @@
               %td
                 %a.tip{ :href => i.html_url, :title => i.body }
                   %strong= "##{i.number}" 
-              %td{ :onclick => "popIssue(#{i.number})" }= i.title 
+              %td{ :onclick => "popIssue(#{i.number})" }= h i.title 
               %td= h i.assignee.login
               %td
                 = h i.milestone.title
                 %a.btn.btn-mini.btn-info{ :href => "#{prefix}/milestones?milestone=#{i.milestone.number}" } pivot
               %td
                 - i.labels.each do |l|
-                  %span.label{ :style => "background-color: ##{l.color}" }= l.name
+                  %span.label{ :style => "background-color: ##{l.color}" }= h l.name
               %td= i.state
           - if @by_labels[l].empty?
             %tr
