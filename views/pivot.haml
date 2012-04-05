@@ -22,9 +22,9 @@
                 %a.tip{ :href => i.html_url, :title => i.body }
                   %strong= "##{i.number}" 
               %td{ :onclick => "popIssue(#{i.number})" }= i.title 
-              %td= i.assignee.login
+              %td= h i.assignee.login
               %td
-                = i.milestone.title
+                = h i.milestone.title
                 %a.btn.btn-mini.btn-info{ :href => "#{prefix}/milestones?milestone=#{i.milestone.number}" } pivot
               %td
                 - i.labels.each do |l|

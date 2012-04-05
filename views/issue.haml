@@ -1,15 +1,15 @@
 %table.table.table-condensed.table-bordered
   %th{ :colspan => 2 }
-    %a{ :href => @issue.html_url }=  @issue.title
+    %a{ :href => @issue.html_url }=  h @issue.title
   %tr
     %th Number:
-    %td= @issue.number
+    %td= h @issue.number
   %tr
     %th Assigned To:
-    %td= @issue.assignee ? @issue.assignee.login : 'Not Assigned'
+    %td= h(@issue.assignee ? @issue.assignee.login : 'Not Assigned')
   %tr
     %th Status:
-    %td= @issue.state
+    %td= h @issue.state
   %tr
     %th Created At:
     %td= @issue.created_at.sub(/T.*$/, '')

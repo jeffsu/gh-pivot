@@ -1,3 +1,12 @@
-%a{ :href => "#{prefix}/milestones" } Milestones
-%br/
-%a{ :href => "#{prefix}/pivot" } Pivot
+- if @gh.token?
+  You are logged as #{session[:login]}
+  %form
+    %label User of repo/project:
+    %input{ :name => 'user' }
+    %label Name of repo/project:
+    %input{ :name => 'repo' }
+    %br/
+    %input.btn{ :type => 'submit' }
+  %a{ :href => '/logout' } Logout
+- else   
+  %a{ :href => '/login' } Login into Github

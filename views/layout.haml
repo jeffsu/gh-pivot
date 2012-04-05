@@ -14,19 +14,24 @@
         .container-fluid
           %a.brand{ :href => '/' }
             Github Pivot:
-            - if @gh && @gh.user && @gh.repo
+            - if @gh.repo?
               %small= @gh.user + '/' + @gh.repo
+
           .nav-collapse
             %ul.nav
-              %li 
-                %a Pivot By:
-              %li
-                %a{ :href => "#{prefix}/milestones" } Milestones
-              %li
-                %a{ :href => "#{prefix}/pivot" } Labels
-            
+              - if @gh.repo?
+                %li 
+                  %a Pivot By:
+                %li
+                  %a{ :href => "#{prefix}/milestones" } Milestones
+                %li
+                  %a{ :href => "#{prefix}/pivot" } Labels
+              - if @gh.token?
+                %li
+                  %a{ :href => '/logout' }= "Logged in as: " + session[:login]
+           
     .container-fluid
-      =yield
+      = yield
     .saving{ :style => 'position: fixed; bottom: 0; left: 0; background-color: #eee; padding: 15px; font-size: 2em; display: none' }
     :javascript
       $(function () { 

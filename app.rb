@@ -2,45 +2,52 @@ require 'sinatra'
 require 'haml'
 require 'yaml'
 require 'rack'
+require 'cgi'
 
 ROOT = File.dirname(__FILE__)
 require "#{ROOT}/lib/gh"
-
+require "#{ROOT}/lib/auth"
 
 class App < Sinatra::Application
   enable :sessions
 
   before do
-    @gh = nil
+    @gh = GH.new(session)
 
-    if session[:username] && session[:password]
-      @gh = GH.new(session)
-    elsif request.path != '/login'
-      redirect '/login'
-    end
+    return if request.path == '/callback'
 
-    splitted = request.path.split('/')
-
-    if splitted.length >= 3
-      @gh.repo = splitted[2]
-      @gh.user = splitted[1]
+    if !@gh.token? && request.path != '/login' && request.path != '/'
+      redirect '/'
     end
 
 
-    if @gh.repo && @gh.user
+    if request.path.match(/^\/repos/)
+      splitted = request.path.split('/')
+      @gh.user = splitted[2]
+      @gh.repo = splitted[3]
+    end
+
+
+    if !@gh
+      haml :login
+    elsif @gh.repo && @gh.user
       haml :index
     end
 
   end
 
   helpers do
-    def prefix
-      "/#{@gh.user}/#{@gh.repo}"
+    def h(str)
+      CGI.escapeHTML(str.to_s)
     end
-  end
 
-  get '/login' do
-    haml :login
+    def prefix
+      if @gh.ready?
+        "/repos/#{@gh.user}/#{@gh.repo}"
+      else 
+        ""
+      end
+    end
   end
 
   post '/login' do
@@ -48,19 +55,20 @@ class App < Sinatra::Application
     session[:password] = params[:password]
     session[:repo]     = params[:repo]
     session[:user]     = params[:user] || params[:username]
+    @gh = GH.new(session)
     haml :index
   end
 
   get '/' do
-    haml :index
+    if params[:repo] && params[:user]
+      redirect "/repos/#{params[:user]}/#{params[:repo]}/pivot"
+    else
+      haml :index
+    end
   end
 
-  get '/:user/:repo' do
-    haml :index
-  end
 
-
-  get '/:user/:repo/pivot' do
+  get '/repos/:user/:repo/pivot' do
     @labels = params[:group_by].to_s.split(',')
     @issues = @gh.issues(params)
     @by_labels = { 'others' => [] }
@@ -79,7 +87,7 @@ class App < Sinatra::Application
     haml :pivot
   end
 
-  get '/:user/:repo/milestones' do
+  get '/repos/:user/:repo/milestones' do
     @milestones = @gh.milestones + [ OpenStruct.new({ :title => 'Others', :number => 0 }) ]
     @issues = @gh.issues(params)
 
@@ -89,7 +97,7 @@ class App < Sinatra::Application
     haml :milestones
   end
 
-  post '/:user/:repo/update-issue' do
+  post '/repos/:user/:repo/update-issue' do
     issue = @gh.issue(params[:number])
     
     if params[:label]
@@ -103,9 +111,39 @@ class App < Sinatra::Application
     end
   end
 
-  get '/:user/:repo/issues/:n' do
+  get '/repos/:user/:repo/issues/:n' do
     @issue = @gh.issue(params[:n])
     @issue.comments =  @issue.comments > 0 ? @gh.comments(@issue.number) : []
     haml :issue
+  end
+
+  get '/login' do
+    url = Auth.client.auth_code.authorize_url(:redirect_uri => Auth.redirect_uri(request.url), :scope => 'repo')
+    puts "Redirecting to URL: #{url.inspect}"
+    redirect url
+  end
+
+  get '/logout' do
+    session[:token] = nil
+    session[:login] = nil
+    redirect '/'
+  end
+
+
+    
+  get '/callback' do
+    begin
+      access_token = Auth.client.auth_code.get_token(params[:code], :redirect_uri => Auth.redirect_uri(request.url))
+      session[:token] = access_token.token
+      session[:login] = JSON.parse(access_token.get('/user').body)['login']
+      puts session[:token]
+      redirect '/'
+    rescue OAuth2::Error => e
+      %(<p>Outdated ?code=#{params[:code]}:</p><p>#{$!}</p><p><a href="/auth/github">Retry</a></p>)
+    end
+  end
+
+  get '/*' do
+    redirect '/'
   end
 end

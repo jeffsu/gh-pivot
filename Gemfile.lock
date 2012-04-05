@@ -1,10 +1,24 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    addressable (2.2.7)
+    faraday (0.7.6)
+      addressable (~> 2.2)
+      multipart-post (~> 1.1)
+      rack (~> 1.1)
+    json (1.6.6)
+    multi_json (1.2.0)
+    multipart-post (1.1.5)
+    oauth2 (0.5.2)
+      faraday (~> 0.7)
+      multi_json (~> 1.0)
+    rack (1.4.1)
     rdiscount (1.6.8)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  json
+  oauth2
   rdiscount

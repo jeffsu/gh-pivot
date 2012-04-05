@@ -3,15 +3,33 @@ require 'json'
 require 'ostruct'
 
 class GH 
-  attr_accessor :username, :password, :user, :repo
+  attr_accessor :username, :password, :user, :repo, :token
   ISSUE_FILTERS = %W| labels assignee state milestone since per_page page |
  
-  def initialize(credentials) 
-    @username = credentials[:username] 
-    @password = credentials[:password] 
+  def initialize(config) 
+    setup(config)
+  end
 
-    @user = credentials[:user] 
-    @repo = credentials[:repo] 
+  def token?
+    return token 
+  end
+
+  def repo?
+    return @user && @repo
+  end
+
+  def ready?
+    return token && repo?
+  end
+
+  def repo_path
+    repo? ? "#{@user}/#{@repo}" : nil  
+  end
+
+  def setup(config)
+    @token = config[:token] 
+    @user = config[:user] 
+    @repo = config[:repo] 
   end
 
   def normalize_issue(hash)
@@ -86,18 +104,21 @@ class GH
 
   def request(path)
     puts path
-    c = Curl::Easy.new(url(path))
+    c = Curl::Easy.new(url(path)) { |c| c.headers = { 'Authorization' => "token #{token}" } }
 
     c.http_auth_types = :basic
     c.username = username
     c.password = password
 
     c.perform
+    if c.response_code != 200
+      raise "error accessing github api: #{url(path)} - #{c.body_str}"
+    end
     return JSON.parse(c.body_str)
   end
 
   def url(path)
-    return "https://api.github.com/repos/#{user}/#{repo}/#{path}"
+    return "https://api.github.com/repos/#{repo_path}/#{path}"
   end
 
 end

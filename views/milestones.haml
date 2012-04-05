@@ -1,4 +1,3 @@
-
 .row-fluid
   .span9
     %table.table-bordered.table.table-condensed
@@ -14,10 +13,10 @@
           %tr.divider
             %th
             %th{ :colspan => 2 }
-              = m.title
-              = m.due_on ? " - " + m.due_on.sub(/T.*/, '') : ''
+              = h m.title
+              = h(m.due_on ? " - " + m.due_on.sub(/T.*/, '') : '')
               - if m.number > 0
-                %a.tip.large{ :href => %"https://github.com/#{@gh.user}/#{@gh.repo}/issues?milestone=#{m.number}", :title => m.description }= '#' + m.number.to_s
+                %a.tip.large{ :href => %"https://github.com/#{@gh.repo_path}/issues?milestone=#{m.number}", :title => m.description }= '#' + m.number.to_s
             %th{ :colspan => 2 }
               %a.small.btn.btn-mini.btn-info{ :href => "#{prefix}/pivot?milestone=#{m.number}"} pivot
               %a.small.btn.btn-mini.btn-alert{ :onclick => '$(this).closest("thead").next().fadeToggle()'} toggle
@@ -29,12 +28,12 @@
                 %td
                   %a.tip{ :href => i.html_url, :title => i.body }
                     %strong= "##{i.number}" 
-                %td{ :onclick => "popIssue(#{i.number})" }= i.title 
+                %td{ :onclick => "popIssue(#{i.number})" }= h i.title 
                 %td
                   - i.labels.each do |l|
-                    %span.label{ :style => "background-color: ##{l.color}"}= l.name
-                %td= i.assignee.login
-                %td= i.state
+                    %span.label{ :style => "background-color: ##{l.color}"}= h l.name
+                %td= h i.assignee.login
+                %td= h i.state
           - else
             %tr
               %td{ :colspan => 5 }
@@ -60,7 +59,7 @@
       %input.btn.btn-info{ :type => 'submit', :value => 'Filter' }
     %hr
     %a.btn.btn-info{ :href => "#{prefix}/milestones" } Pivot By Labels
-    %a.btn.btn-success{ :href => "https://github.com#{prefix}/issues/new" } New Issue
+    %a.btn.btn-success{ :href => "https://github.com/#{@gh.repo_path}/issues/new" } New Issue
 
 
 :javascript
@@ -83,6 +82,7 @@
       $.post('#{prefix}/update-issue', { milestone: mn, number: n }, function () { $ele.attr('milestone', mn); console.log('saved') });
     }
   }
+
 %style
   :sass
     .sortable
