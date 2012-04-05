@@ -92,9 +92,15 @@ class GH
       curl.http_auth_types = :basic
       curl.username = username
       curl.password = password
+      curl.headers = { 'Authorization' => "token #{token}" }
     end
 
-    puts c.body_str
+    c.perform
+
+    if c.response_code != 200
+      raise "error accessing github api: #{url(path)} - #{c.body_str}"
+    end
+
   end
  
 
