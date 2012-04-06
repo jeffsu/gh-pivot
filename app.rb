@@ -11,6 +11,7 @@ require "#{ROOT}/lib/auth"
 class App < Sinatra::Application
   enable :sessions
 
+  set :haml, { :escape_html => true }
   before do
     @gh = GH.new(session)
 
@@ -38,7 +39,7 @@ class App < Sinatra::Application
 
   helpers do
     def h(str)
-      CGI.escapeHTML(str.to_s)
+      str
     end
 
     def prefix

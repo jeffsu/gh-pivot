@@ -13,8 +13,8 @@
           %tr.divider
             %th
             %th{ :colspan => 2 }
-              = h m.title
-              = h(m.due_on ? " - " + m.due_on.sub(/T.*/, '') : '')
+              = m.title
+              = m.due_on ? " - " + m.due_on.sub(/T.*/, '') : ''
               - if m.number > 0
                 %a.tip.large{ :href => %"https://github.com/#{@gh.repo_path}/issues?milestone=#{m.number}", :title => m.description }= '#' + m.number.to_s
             %th{ :colspan => 2 }
@@ -32,8 +32,8 @@
                 %td
                   - i.labels.each do |l|
                     %span.label{ :style => "background-color: ##{l.color}"}= h l.name
-                %td= h i.assignee.login
-                %td= h i.state
+                %td= i.assignee.login
+                %td= i.state
           - else
             %tr
               %td{ :colspan => 5 }

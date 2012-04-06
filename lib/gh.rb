@@ -1,6 +1,7 @@
 require 'curb'
 require 'json'
 require 'ostruct'
+require 'cgi'
 
 class GH 
   attr_accessor :username, :password, :user, :repo, :token
@@ -70,7 +71,7 @@ class GH
     params['page'] ||= 1
     puts "calling page: #{params['page']}"
 
-    query = params.keys.collect { |k| "#{k}=#{params[k]}" }.join('&')
+    query = params.keys.collect { |k| "#{k}=#{CGI.escape(params[k].to_s)}" }.join('&')
 
     ret = request("issues?#{query}").collect { |i| normalize_issue(i) }.sort { |a,b| a.number <=> b.number }
 
@@ -111,10 +112,6 @@ class GH
   def request(path)
     puts path
     c = Curl::Easy.new(url(path)) { |c| c.headers = { 'Authorization' => "token #{token}" } }
-
-    c.http_auth_types = :basic
-    c.username = username
-    c.password = password
 
     c.perform
     if c.response_code != 200

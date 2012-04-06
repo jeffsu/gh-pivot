@@ -31,7 +31,7 @@
                   %a{ :href => '/logout' }= "Logged in as: " + session[:login]
            
     .container-fluid
-      = yield
+      != yield
     .saving{ :style => 'position: fixed; bottom: 0; left: 0; background-color: #eee; padding: 15px; font-size: 2em; display: none' }
     :javascript
       $(function () { 
