@@ -3,7 +3,6 @@ var qs      = require('querystring');
 var url     = require('url');
 
 export class Github {
-  include $m.EventEmitter;
   private {
     var BASE = "https://api.github.com";
   }
@@ -44,6 +43,80 @@ export class Github {
   function repo(u, r) {
     return new Repo(u, r, this);
   }
+
+  function repoTracker(u, r) {
+    return new RepoTracker(new Repo(u, r, this));
+  }
+}
+
+
+class RepoTracker {
+  include $m.EventEmitter;
+
+  private {
+    var PER = 100;
+  }
+
+  function initialize(repo) {
+    this.repo = repo;
+    this.since = null;
+    this.firstTime = true;
+
+    this.issues     = {};
+    this.milestones = {};
+
+    this.start();
+  }
+
+  function start() {
+    var meta = { issues: [], milestones: [], count: 2 };
+
+    function finish() {
+      if (meta.count == 0) {
+        self.emit('ready');
+      }
+    }
+
+    this.retrieveIssues(1, meta, finish);
+    this.retrieveMilestones(meta, finish);
+  }
+
+  function retrieveIssues(page, meta, cb) {
+    var filters = { page: page, per_page: PER };
+    if (this.since) filters.since = this.since;
+
+    this.repo.issues(filters, #(err, issues) {
+      if (err) return self.emit('error', err);
+      self.merge(issues, meta);
+      if (issues.length == PER) {
+        self.retrieveIssues(page + 1, meta, cb);
+      } else {
+        if (meta.issues.length) {
+          self.emit('updated-issues', meta.updated);
+          self.emit('updated', meta.updated);
+        }
+        cb();
+      }
+    });
+
+  }
+
+  function retrieveMilestones(meta, cb) {
+    this.repo.milestones(#(err, ms) {
+      foreach (var m in ms) {
+        self.milestones[m.number] = m;
+      }
+      cb();
+    });
+  }
+
+  function merge(issues, meta) {
+    foreach (var i in issues) {
+      var old = this.issues[i.number];
+      if (!old) meta.issues.push(i);
+      this.issues[i.number] = i;
+    }
+  }
 }
 
 class Repo {
@@ -52,16 +125,6 @@ class Repo {
     this.repo = repo;
     this.gh   = gh;
     this.base = '/repos/' + this.user + '/' + this.repo;
-  }
-
-  function cache() {
-    issues = {};
-
-    function sync() {
-
-    }
-
-
   }
 
   function issues(filters, cb) {
@@ -73,21 +136,22 @@ class Repo {
       cb(null, data);
     });
   }
+
+  function milestones(filters, cb) {
+    if (arguments.length == 1) cb = filters;
+    this.gh.get(this.base + '/milestones', filters, #(err, data) {
+      if (err) return cb(err);
+      data.forEach(#{ $1.__proto__ = Milestone.prototype; $1.gh = self.gh; });
+      cb(null, data);
+    });
+  }
+}
+
+class Milestone {
+
 }
 
 class Issue {
-  function initialize(gh) {
-    this.gh = gh;
-  }
 
-  function save(params, cb) {
-    if (this.number) {
-      var ret = {};
-      for (var k in this) if (k != 'gh') ret[k] = this[k];
-      this.gh.post('/issues', ret, cb);
-    } else {
-      this.gh.post('/issues/' + this.number, params, cb);
-    }
-  }
 }
 
