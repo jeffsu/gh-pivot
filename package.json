@@ -1,0 +1,19 @@
+{
+  "name": "tempo",
+  "description": "Github pivot",
+  "keywords": [ "javascript", "language", "mochiscript", "counter", "stats", "github" ],
+  "author": "Jeff Su",
+  "version": "0.0.1-pre1",
+  "licenses": [ { "type": "MIT" }],
+  "engines": { "node": ">=0.4.0" },
+  "bin": {},
+  "dependencies": { 
+    "mochiscript": ">=0.5.1",
+    "express": "2.5.8",
+    "everyauth": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jeffsu/tempo.git"
+  }
+}
