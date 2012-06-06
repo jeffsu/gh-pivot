@@ -1,0 +1,18 @@
+{
+  "author": "Jeff Su <me@jeffsu.com>",
+  "name": "populator",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jeffsu/gh-pivot.git"
+  },
+  "dependencies": {
+    "mochiscript": ">= 0.5.5",
+    "mongodb":     ""
+  },
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
