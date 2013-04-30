@@ -93,7 +93,7 @@ class GH
       curl.http_auth_types = :basic
       curl.username = username
       curl.password = password
-      curl.headers = { 'Authorization' => "token #{token}" }
+      curl.headers = { 'Authorization' => "token #{token}", 'User-Agent' => 'passport-github' }
     end
 
     c.perform
@@ -111,7 +111,7 @@ class GH
 
   def request(path)
     puts path
-    c = Curl::Easy.new(url(path)) { |c| c.headers = { 'Authorization' => "token #{token}" } }
+    c = Curl::Easy.new(url(path)) { |c| c.headers = { 'Authorization' => "token #{token}", 'User-Agent' => 'passport-github' } }
 
     c.perform
     if c.response_code != 200
